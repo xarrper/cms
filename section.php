@@ -129,7 +129,7 @@ class Sections {
 		}
 	}
 	
-	public function deleteSection($id) { 
+	public function deleteSection($id) { //удаление и всех его детей!!
 		try
 		{	
 			$DBH = new PDO('mysql:host=127.0.0.1;dbname=cms','root',''); //в отдельный метод!!

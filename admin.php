@@ -2,13 +2,26 @@
  
 require("section.php");
 
-$section = isset( $_GET['section'] ) ? $_GET['section'] : 1; //åñëè ñåêöèÿ íå óêàçàíî, òî ïî óìîë÷àíèþ ãëàâíàÿ, ò.å. 1.
-menu($section);
-//!ïðîâåðêà ñåññèè, ÀËÅ!
+$section = isset( $_GET['section'] ) ? $_GET['section'] : 1; //ÐµÑÐ»Ð¸ ÑÐµÐºÑ†Ð¸Ñ Ð½Ðµ ÑƒÐºÐ°Ð·Ð°Ð½Ð¾, Ñ‚Ð¾ Ð¿Ð¾ ÑƒÐ¼Ð¾Ð»Ñ‡Ð°Ð½Ð¸ÑŽ Ð³Ð»Ð°Ð²Ð½Ð°Ñ, Ñ‚.Ðµ. 1.
+$action = isset( $_GET['action'] ) ? $_GET['action'] : 1; //ÐµÑÐ»Ð¸ Ð´ÐµÐ¹ÑÑ‚Ð²Ð¸Ðµ Ð½Ðµ ÑƒÐºÐ°Ð·Ð°Ð½Ð¾, Ñ‚Ð¾ Ð½Ð¸Ñ‡ÐµÐ³Ð¾
+
+switch ($action) {
+  case 'new':
+    //newArticle();
+    break;
+  case 'act':
+	act();
+    break;
+  default:
+    admin($section);
+}
+
+//!Ð¿Ñ€Ð¾Ð²ÐµÑ€ÐºÐ° ÑÐµÑÑÐ¸Ð¸, ÐÐ›Ð•!
  
-function info($section) { //âûâîä èíôû ñåêöèè
+function info($section) { //Ð²Ñ‹Ð²Ð¾Ð´ Ð¸Ð½Ñ„Ñ‹ ÑÐµÐºÑ†Ð¸Ð¸
 	$data = Sections::getIdSection($section);
-	require("viewAdmin.php");
+	return $data;
+	//require("viewAdmin.php");
 }
  
 function tree($data,$parent_id) {
@@ -25,18 +38,25 @@ function tree($data,$parent_id) {
 	return $tree;
 }	
  
-function menu($section) { //âûâîä äåðåâà
+function menu($section) { //Ð²Ñ‹Ð²Ð¾Ð´ Ð´ÐµÑ€ÐµÐ²Ð°
   
   $data = Sections::getIdSectionMenu($section);
 	//print_r($data);
-	echo tree($data,0);
+	return tree($data,0);
   //require("viewAdmin.php");
 }
 
-function admin() { //çàãðóçêà ïðåäñòàâëåíèÿ
-  info($section);
-  tree($section);
+function admin($section) { //Ð·Ð°Ð³Ñ€ÑƒÐ·ÐºÐ° Ð¿Ñ€ÐµÐ´ÑÑ‚Ð°Ð²Ð»ÐµÐ½Ð¸Ñ
+  $data = array();
+  $data = info($section);
+  $data['menu'] = menu($section);
   require("viewAdmin.php");
+}
+
+function act() {
+	if(isset($_POST['delete'])) echo 'ÑƒÐ´Ð°Ð»Ð¸Ñ‚ÑŒ';
+	if(isset($_POST['edit'])) echo 'Ð¸Ð·Ð¼ÐµÐ½Ð¸Ñ‚ÑŒ';
+	//header Location//
 }
  
 ?>
