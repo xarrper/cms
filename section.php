@@ -41,31 +41,50 @@ class Sections {
 		}
 	}
 	
-	private function tree(&$rs,$parent)
+	private function masParents($id)
 	{
-		$out = array();
-		if (!isset($rs[$parent])) {
-			return $out;
-		}
-		foreach ($rs[$parent] as $row) {
-			$chidls = $this->tree($rs, $row['id']);
-			if ($chidls) $row['childs'] = $chidls;
-			$out[] = $row;
-		}
-		return $out;
-	}
-	
-	public function getIdSectionMenu($id) { //хз
 		$DBH = new PDO('mysql:host=127.0.0.1;dbname=cms','root','');
 		$stmt = $DBH->query("SELECT * FROM sections");
 		$stmt->setFetchMode(PDO::FETCH_ASSOC);
 
-		$rs2 = array();
+		$data = array();
 		while($row = $stmt->fetch()) {
-			$rs2[$row['parent_id']][] = $row;
+			$data[] = $row;
 		}
-		$rs2 = $this->tree($rs2 ,$id);
-		return $rs2;
+		
+		//$mas = array();
+		//$mas[] = $id;
+		$str = '('.$id;
+		while($id!=0) {
+			for ($i=0; $i<count($data); $i++) {
+				if($data[$i]['id']==$id) {
+					$id = $data[$i]['parent_id'];
+			//		$mas[] = $id;
+					$str .= ','.$id;
+					break;
+				}
+			}
+		}
+		$str .= ')';
+		return $str;
+	}
+	
+	public function getIdSectionMenu($id) { 
+
+		$strParent = self::masParents($id);
+		
+		$DBH = new PDO('mysql:host=127.0.0.1;dbname=cms','root','');
+		$stmt = $DBH->query("SELECT * FROM sections WHERE  `parent_id` IN ".$strParent);
+		$stmt->setFetchMode(PDO::FETCH_ASSOC);
+	
+
+		$data = array();
+			while($row = $stmt->fetch()) {
+				$data[$row['parent_id']][$row['id']] =  $row;
+			}
+
+		return $data;
+
 	}
 	
 	public function updateSection($data) { //здесь же и перенос статьи!(нужно указать ключ родителя!)
@@ -126,8 +145,8 @@ class Sections {
 		}
 	}
 }
-//$a = new Sections();
-//print_r($a->getIdSectionMenu(0));
+$a = new Sections();
+//print_r($a->getIdSectionMenu(8));
 //print_r($t);
 /*
 //$t= $a->getIdSection(1);

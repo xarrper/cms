@@ -3,7 +3,7 @@
 require("section.php");
 
 $section = isset( $_GET['section'] ) ? $_GET['section'] : 1; //если секция не указано, то по умолчанию главная, т.е. 1.
-info($section);
+menu($section);
 //!проверка сессии, АЛЕ!
  
 function info($section) { //вывод инфы секции
@@ -11,22 +11,32 @@ function info($section) { //вывод инфы секции
 	require("viewAdmin.php");
 }
  
-function tree($section) { //вывод дерева
-  $results = array();
-  $data = Article::getList();
-  $results['articles'] = $data['results'];
-  $results['totalRows'] = $data['totalRows'];
-  $results['pageTitle'] = "Article Archive | Widget News";
-  require( TEMPLATE_PATH . "/archive.php" );
+function tree($data,$parent_id) {
+	if(is_array($data) and isset($data[$parent_id])){
+        $tree = '<ul>';
+		foreach($data[$parent_id] as $d){
+			$tree .= '<li>'.$d['name'].' #'.$d['id'];
+			$tree .=  tree($data,$d['id']);
+			$tree .= '</li>';
+		}
+        $tree .= '</ul>';
+    }
+    else return null;
+	return $tree;
+}	
+ 
+function menu($section) { //вывод дерева
+  
+  $data = Sections::getIdSectionMenu($section);
+	//print_r($data);
+	echo tree($data,0);
+  //require("viewAdmin.php");
 }
 
 function admin() { //загрузка представления
-  $results = array();
-  $data = Article::getList();
-  $results['articles'] = $data['results'];
-  $results['totalRows'] = $data['totalRows'];
-  $results['pageTitle'] = "Article Archive | Widget News";
-  require( TEMPLATE_PATH . "/archive.php" );
+  info($section);
+  tree($section);
+  require("viewAdmin.php");
 }
  
 ?>
