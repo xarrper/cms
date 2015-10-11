@@ -1,6 +1,6 @@
 <?
 @session_start();
-require("../config.php");
+require("config.php");
 if (isset($_SESSION['login']) and isset($_SESSION['password'])) {
 	header("Location: ".PATH."/admin.php"); 
 }

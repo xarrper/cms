@@ -156,16 +156,14 @@ class Sections {
 		try {	
 			$data = self::listSection();
 			$mas = array();
-			$mas = self::masChilds($data, 0, $mas);
+			$mas = self::masChilds($data, $id, $mas);
 			$mas = array_unique($mas);
 			$mas = array_values($mas);
-			print_r($mas);
 			$str = '('.$mas[0];
 			for ($i=1; $i<count($mas); $i++) {
 				$str .= ','.$mas[$i];
 			}
 			$str .= ')';
-			print_r($str);
 			$DBH = self::connect();
 			$stmt = $DBH->query("DELETE FROM sections WHERE  `parent_id` IN ".$str);
 			$stmt->setFetchMode(PDO::FETCH_ASSOC);

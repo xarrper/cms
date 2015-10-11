@@ -1,6 +1,6 @@
 <?
 require("section.php");
-require("../config.php");
+require("config.php");
 
 $section = isset( $_GET['section'] ) ? $_GET['section'] : 1; 
 $section = (Sections::isSection($section)) ? $section : 0;
