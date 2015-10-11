@@ -74,6 +74,18 @@ class Sections {
 		return $str;
 	}
 	
+	private function masChilds($data, $id, &$m) {
+		$m[] = $id;
+		for ($i=0; $i<count($data); $i++) {
+			if($data[$i]['parent_id']==$id) {
+				$child_id = $data[$i]['id'];
+				$m[] = $child_id;
+				self::masChilds($data, $child_id, $m);
+			}
+		}
+		return $m;
+	}
+	
 	public function bread($id) {
 		$data = self::listSection();
 		$mas = array();
@@ -140,53 +152,27 @@ class Sections {
 		}
 	}
 	
-	public function deleteSection($id) { // ИСПРАВИТЬ!
+	public function deleteSection($id) { 
 		try {	
+			$data = self::listSection();
+			$mas = array();
+			$mas = self::masChilds($data, 0, $mas);
+			$mas = array_unique($mas);
+			$mas = array_values($mas);
+			print_r($mas);
+			$str = '('.$mas[0];
+			for ($i=1; $i<count($mas); $i++) {
+				$str .= ','.$mas[$i];
+			}
+			$str .= ')';
+			print_r($str);
 			$DBH = self::connect();
-			$stmt = $DBH->prepare("DELETE FROM sections where id=:id");
-			$stmt->bindParam(':id', $id);
-			$stmt->execute();
+			$stmt = $DBH->query("DELETE FROM sections WHERE  `parent_id` IN ".$str);
+			$stmt->setFetchMode(PDO::FETCH_ASSOC);
 		}
 		catch(PDOException $e) {
 			die("Error: ".$e->getMessage());
 		}
 	}
 }
-/*$DBH = new PDO('mysql:host=127.0.0.1;dbname=cms','root','');
-$stmt = $DBH->query("SELECT * FROM sections");
-$stmt->setFetchMode(PDO::FETCH_ASSOC);
-
-$data = array();
-while($row = $stmt->fetch()) {
-	$data[] = $row;
-}
-$mas = array();
-function asd($data, $id, $mas) {
-	$mas[] = $id;
-	for ($i=0; $i<count($data); $i++) {
-		if($data[$i]['parent_id']==$id) {
-			$id = $data[$i]['id'];
-			$mas[] = $id;
-			echo $id.',';
-			asd($data, $id, $mas);
-		}
-	}
-	return $mas;
-}
-print_r(asd($data, 1, $mas));*/
-//$a = new Sections();
-//var_dump($a->isSection(0));
-//print_r($t);
-/*
-//$t= $a->getIdSection(1);
-//print_r($t);
-$data = array( //убрать старую версию
-    "parent_id" => 3,
-    "name" => "раздел№6",
-	"text" => "текст раздела №6",
-);
-
-$a->deleteSection(7);
-*/
-
 ?>
