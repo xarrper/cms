@@ -5,30 +5,31 @@ class Sections {
 	public $text = null;
 	public $name = null;
 	
-	function __construct($id=null, $name=null, $text=null) { //норм конструктор сделать
+	function __construct($id=null, $name=null, $text=null) { 
 		$this->id = $id;
 		$this->name = $name;
 		$this->text = $text;
 	}
 	
-	private function connect() { //try
-		//$DBH = new PDO('mysql:host=127.0.0.1;dbname=cms','root',''); //где вас хранить,!? ребяяят?
+	private function connect() { 
+		try {
+			return $DBH = new PDO('mysql:host=127.0.0.1;dbname=cms','root',''); 
+		}
+		catch(PDOException $e) {
+			die("Error: ".$e->getMessage());
+		}
 	}
 	
-	public function a() {
-		return $str = 100;
-	}
-	
-	public function b() {
-		$str = $this->a();
-		return $str;
+	public function isSection($id) { 
+		$data = self::getIdSection($id);
+		if (!isset($data['id'])) return false;
+		return true;
 	}
 	
 	public function getIdSection($id) { 
 		try
 		{	
-			$DBH = new PDO('mysql:host=127.0.0.1;dbname=cms','root',''); //в отдельный метод!!
-			
+			$DBH = self::connect();
 			$stmt = $DBH->prepare("SELECT * FROM sections WHERE id=?");
 			$stmt->bindValue(1, $id, PDO::PARAM_INT);
 			$stmt->execute();
@@ -41,25 +42,29 @@ class Sections {
 		}
 	}
 	
-	private function masParents($id)
-	{
-		$DBH = new PDO('mysql:host=127.0.0.1;dbname=cms','root','');
-		$stmt = $DBH->query("SELECT * FROM sections");
-		$stmt->setFetchMode(PDO::FETCH_ASSOC);
-
-		$data = array();
-		while($row = $stmt->fetch()) {
-			$data[] = $row;
+	private function listSection() { 
+		try {	
+			$DBH = self::connect();
+			$stmt = $DBH->query("SELECT * FROM sections");
+			$stmt->setFetchMode(PDO::FETCH_ASSOC);
+			$data = array();
+			while($row = $stmt->fetch()) {
+				$data[] = $row;
+			}
+			return $data;
 		}
-		
-		//$mas = array();
-		//$mas[] = $id;
+		catch(PDOException $e) {
+			die("Error: ".$e->getMessage());
+		}
+	}
+	
+	private function masParents($id) {
+		$data = self::listSection();
 		$str = '('.$id;
 		while($id!=0) {
 			for ($i=0; $i<count($data); $i++) {
 				if($data[$i]['id']==$id) {
 					$id = $data[$i]['parent_id'];
-			//		$mas[] = $id;
 					$str .= ','.$id;
 					break;
 				}
@@ -69,29 +74,39 @@ class Sections {
 		return $str;
 	}
 	
-	public function getIdSectionMenu($id) { 
-
-		$strParent = self::masParents($id);
-		
-		$DBH = new PDO('mysql:host=127.0.0.1;dbname=cms','root','');
-		$stmt = $DBH->query("SELECT * FROM sections WHERE  `parent_id` IN ".$strParent);
-		$stmt->setFetchMode(PDO::FETCH_ASSOC);
-	
-
-		$data = array();
-			while($row = $stmt->fetch()) {
-				$data[$row['parent_id']][$row['id']] =  $row;
+	public function bread($id) {
+		$data = self::listSection();
+		$mas = array();
+		$mas_d = array();
+		while($id!=0) {
+			for ($i=0; $i<count($data); $i++) {
+				if($data[$i]['id']==$id) {
+					$id = $data[$i]['parent_id'];
+					$mas_d['id'] = $data[$i]['id'];
+					$mas_d['name'] = $data[$i]['name'];
+					$mas[] = $mas_d;
+					break;
+				}
 			}
-
-		return $data;
-
+		}
+		return $mas;
 	}
 	
-	public function updateSection($data) { //здесь же и перенос статьи!(нужно указать ключ родителя!)
-		try
-		{	
-			$DBH = new PDO('mysql:host=127.0.0.1;dbname=cms','root',''); //в отдельный метод!!
-			
+	public function getIdSectionMenu($id) { 
+		$strParent = self::masParents($id);
+		$DBH = self::connect();
+		$stmt = $DBH->query("SELECT * FROM sections WHERE  `parent_id` IN ".$strParent);
+		$stmt->setFetchMode(PDO::FETCH_ASSOC);
+		$data = array();
+		while($row = $stmt->fetch()) {
+			$data[$row['parent_id']][$row['id']] =  $row;
+		}
+		return $data;
+	}
+	
+	public function updateSection($data) { //обновление данных и перенос статьи
+		try {	
+			$DBH = self::connect();
 			$stmt = $DBH->prepare("UPDATE sections set parent_id = :parent_id, name = :name, text = :text where id=:id");
 			$stmt->bindParam(':parent_id', $parent_id);
 			$stmt->bindParam(':name', $name);
@@ -103,17 +118,14 @@ class Sections {
 			$id = $data['id'];
 			$stmt->execute();
 		}
-		catch(PDOException $e)
-		{
+		catch(PDOException $e) {
 			die("Error: ".$e->getMessage());
 		}
 	}
 	
 	public function insertSection($data) { 
-		try
-		{	
-			$DBH = new PDO('mysql:host=127.0.0.1;dbname=cms','root',''); //в отдельный метод!!
-			
+		try {	
+			$DBH = self::connect();
 			$stmt = $DBH->prepare("INSERT INTO sections (parent_id, name, text) VALUES (:parent_id, :name, :text)");
 			$stmt->bindParam(':parent_id', $parent_id);
 			$stmt->bindParam(':name', $name);
@@ -123,30 +135,47 @@ class Sections {
 			$text = $data['text'];
 			$stmt->execute();
 		}
-		catch(PDOException $e)
-		{
+		catch(PDOException $e) {
 			die("Error: ".$e->getMessage());
 		}
 	}
 	
-	public function deleteSection($id) { //удаление и всех его детей!!
-		try
-		{	
-			$DBH = new PDO('mysql:host=127.0.0.1;dbname=cms','root',''); //в отдельный метод!!
-			
-			$stmt = $DBH->prepare("DELETE FROM sections where id=:id");//$DBH->exec("DELETE FROM sections where id=:id");
+	public function deleteSection($id) { // ИСПРАВИТЬ!
+		try {	
+			$DBH = self::connect();
+			$stmt = $DBH->prepare("DELETE FROM sections where id=:id");
 			$stmt->bindParam(':id', $id);
 			$stmt->execute();
-			
 		}
-		catch(PDOException $e)
-		{
+		catch(PDOException $e) {
 			die("Error: ".$e->getMessage());
 		}
 	}
 }
-$a = new Sections();
-//print_r($a->getIdSectionMenu(8));
+/*$DBH = new PDO('mysql:host=127.0.0.1;dbname=cms','root','');
+$stmt = $DBH->query("SELECT * FROM sections");
+$stmt->setFetchMode(PDO::FETCH_ASSOC);
+
+$data = array();
+while($row = $stmt->fetch()) {
+	$data[] = $row;
+}
+$mas = array();
+function asd($data, $id, $mas) {
+	$mas[] = $id;
+	for ($i=0; $i<count($data); $i++) {
+		if($data[$i]['parent_id']==$id) {
+			$id = $data[$i]['id'];
+			$mas[] = $id;
+			echo $id.',';
+			asd($data, $id, $mas);
+		}
+	}
+	return $mas;
+}
+print_r(asd($data, 1, $mas));*/
+//$a = new Sections();
+//var_dump($a->isSection(0));
 //print_r($t);
 /*
 //$t= $a->getIdSection(1);

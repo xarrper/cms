@@ -1,0 +1,18 @@
+html, body { margin: 0; padding: 0; border: none; font-family: 'Ubuntu', 'Bitstream Vera Sans', 'DejaVu Sans', Tahoma, sans-serif; }
+html { height: 100%; font-size: 100%; }
+body { min-height: 100%; height: 100%; width: 100%;}
+.header { border-bottom: 1px solid #eee; height: 130px; color: #424242;}
+h1 { border-left: 5px solid #92b001; background-color: #C3DE43; width: 150px; padding-left: 10px;}
+h2 { color: #424242; font-style: oblique; font-weight: 500; -webkit-transition: color 0.7s ease;}
+h2:hover { color: #a3c100; -webkit-transition: color 0.7s ease;}
+.divBlocks { display: inline-block;  float: left;}
+.menu { width: 25%;}
+.content { width: 50%; border-left: 1px solid #eee;}
+a:hover { color: #1cbcfc;}
+a { color: #0277a4; text-decoration: none; font-size: 13pt;}
+p { text-indent: 20px; line-height: 1.4em; text-align: left; color: #333;}
+.divClear { width:100%; height:1px; clear:both;}	
+.paddingHeader { padding: 20px 60px;}
+.paddingContent { padding-left: 35px;}
+.paddingMenu { padding-left: 40px; padding-top: 30px;}
+.sizeMedium { font-size: medium; font-style: normal;}
