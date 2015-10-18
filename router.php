@@ -1,4 +1,4 @@
-<?
+<?//добавтьб ob_start(); ob_get_clean(); ob_end_clean();!
 //просмотреть slim. на завтра. и railis-routing - разобрать
 error_reporting (E_ALL); 
 class Router {
@@ -43,7 +43,7 @@ class Router {
 					$controller = new $controller();
 					if (method_exists($controller, $method)) {
 						call_user_func_array(array($controller, $method), $parameters);
-						exit; //нуженль?
+						exit; 
 					} 
 					else {
 						$this->error(404, "Action " . $controller . "." . $method . "() not found");
@@ -81,9 +81,12 @@ class Router {
 
 class Route {
 	function getRoute() {
-		return array(
-			'~^(home|admin)/([0-9+])~' => '$1/action/$2', //поменять название action. и разделить их admin и home отдельно
-			'~^(enter|home|admin)$~' => '$1/action',//без параметров+
+		return array( //что-нибудь с этим сделать!!!!
+			'~^(home)/([0-9+])~' => 'UserController/action/$2', //поменять название action. и разделить их admin и home отдельно
+			'~^(admin)/([0-9+])~' => 'AdminController/action/$2',
+			'~^(enter)$~' => 'EnterController/action',//без параметров+
+			'~^(home)$~' => 'UserController/action',
+			'~^(admin)$~' => 'AdminController/action',
 		);
 	}
 }

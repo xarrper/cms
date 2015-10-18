@@ -3,7 +3,7 @@
 	error_reporting (E_ALL); 
 	include('config.php');
 	
-	function search_file($folderName, $fileName, &$str){ //куданубдь в другое место
+	function search_file($folderName, $fileName, &$str){ //куда-нубдь в другое место
 		$dir = opendir($folderName);
 		while (($file = readdir($dir)) !== false){ 
 			if($file != "." && $file != ".." && $file != ".git"){ 
@@ -18,8 +18,8 @@
 		closedir($dir);
 	}
 	
-	function __autoload($className) { //где прописать исключение если файла нет???
-		search_file(".", mb_strtolower($className.'.php'), $path);
+	function __autoload($className) { //где прописать исключение если файла нет??? сделать независимой к регистру!
+		search_file(".", ($className.'.php'), $path); //поиск файла во всех дерикториях, а если имя класса совпадает?
 		if(file_exists($path)) require_once($path);
 		else return false;
 	}
